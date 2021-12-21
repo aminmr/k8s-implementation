@@ -3,14 +3,14 @@ This is my first attempt to implementing my own Kubernetes cluster. In this proc
 
 ## Cluster Specification
 
-a Load-balancer: Ha-proxy
-3 Master Nodes + 1 Worker Node
-Kubeadm implementation method
+- Load-balancer: Ha-proxy
+- 3 Master Nodes + 1 Worker Node
+- Kubeadm implementation method
 
-CRI: Docker
-CNI: Weave-net
-CSI: ?
-Ingress: ?
+- CRI: Docker
+- CNI: Weave-net
+- CSI: ?
+- Ingress: Nginx
 
 Network:
 
