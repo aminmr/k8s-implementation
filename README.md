@@ -33,8 +33,12 @@ Worker Node:
 3. After migration of master-2 the filesystem has corrupted and the docker service has not start anymore. So I needed to use `fsck` tools in rescue mode to repair the filesystem.
 ![Filesystem](./images/docker-failure.png)
 
-This failure and fsck lost metadata of docker. There is no solution and you should 
+This failure and fsck lost metadata of docker. There is no solution and you should just delete the `/var/lib/docker` data and restart the docker!
 
+### UFW DNS Problem
+This problem hasn't compeletely undrestand for me!:
+Because of my own decision I disabled dhcp for all nodes and enable NAT to the haproxy node. Everything was ok until enabling the UFW firewall. After enabling the firewall dns resolving got problem! After many research I checked the [linuxize](https://linuxize.com/post/how-to-setup-a-firewall-with-ufw-on-ubuntu-20-04/#ip-masquerading) article and changed ufw setting and it got fixed!
+ 
 ## Kubernetes Challenges
 
  For first time I was implement Kubernetes via `Kubeadm`. This method of implementation was common and has its own challenges:
