@@ -4,7 +4,7 @@ For first implementation, I chose `Nginx-ingress`. The following document is abo
 
 ## HaProxy Configuration
 
-First of all you need to add `frontend` and `backend` section to your haproxy configuration file. The backend port for your master nodes will be configured randomly by the NodePort is assinged to ingress Controller.
+First of all you need to add `frontend` and `backend` section to your haproxy configuration file. The backend port for your master nodes will be configured randomly by the NodePort is assigned to ingress Controller.
 
 ```shell
 frontend kubernetes-ingress-http
@@ -112,6 +112,12 @@ spec:
         - containerPort: 80
 ```
 
+create the service for the deployment:
+
+```shell
+kubectl expose deploy nginx-deployment --port 80
+```
+
 nginx-resource.yaml
 
 ```bash
@@ -133,7 +139,19 @@ spec:
               number: 80
 ```
 
-## More
+## References
 
-For more configuration and other things you can read the [Nginx installation documents](https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-manifests/)
+For more configuration and other things you can read the following:
+
+Nginx Documents:
+
+- [Nginx installation documents](https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-manifests/)
+
+- [Kubernetes Documents](https://kubernetes.github.io/ingress-nginx/deploy/)
+
+And these articles which are not completely correct! :
+
+- [jhooq article](https://jhooq.com/ingress-controller-nginx/#4-setup-kubernetes-ingress-controller)
+
+- [dev.to article](https://dev.to/mrturkmen/nginx-ingress-controller-with-haproxy-for-k8s-cluster-52e1#setup-nginx-ingress-controller)
 
