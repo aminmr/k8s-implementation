@@ -1,10 +1,10 @@
-# Ingress Implementation
+# Nginx-Ingress Implementation
 
-For first implementation, I chose `Nginx-ingress`. The following document is about how to deploy nginx-ingress.
+For the first implementation, I chose `Nginx-ingress`. The following document is about how to deploy Nginx-ingress.
 
 ## HaProxy Configuration
 
-First of all you need to add `frontend` and `backend` section to your haproxy configuration file. The backend port for your master nodes will be configured randomly by the NodePort is assigned to ingress Controller.
+First of all, you need to add the `frontend` and `backend` sections to your Haproxy configuration file. The backend port for your master nodes will be configured randomly by the NodePort is assigned to the ingress Controller.
 
 ```shell
 frontend kubernetes-ingress-http
@@ -20,9 +20,7 @@ backend kubernetes-nodes-http
     server kmaster3 192.168.32.30:30540 check fall 3 rise 2
 ```
 
-
-
-first clone the repositroy and checkout to the latest release branch(By the time of writing this document the latest lelease was v2.1):
+First clone the repository and checkout to the latest release branch(By the time of writing this document the latest release was v2.1 ):
 
 ```bash
 git clone https://github.com/nginxinc/kubernetes-ingress/
@@ -52,7 +50,7 @@ kubectl apply -f common/ingress-class.yaml
 
 As document said:
 
-> By default, it is required to create custom resource definitions for VirtualServer, VirtualServerRoute, TransportServer and Policy. Otherwise, the Ingress Controller pods will not become Ready
+> By default, it is required to create custom resource definitions for VirtualServer, VirtualServerRoute, TransportServer and Policy. Otherwise, the Ingress Controller pods will not become Ready.
 
 ```shell
 kubectl apply -f common/crds/k8s.nginx.org_virtualservers.yaml
@@ -80,7 +78,7 @@ kubectl apply -f daemon-set/nginx-ingress.yaml
 kubectl create -f service/nodeport.yaml
 ```
 
-Now check the NodePort and change the haproxy configuration related to this port.
+Now check the NodePort and change the Haproxy configuration related to this port.
 
 ![NodePort](/home/amin/k8s-implementation/images/NodePort.png)
 
@@ -112,7 +110,7 @@ spec:
         - containerPort: 80
 ```
 
-create the service for the deployment:
+Create the service for the deployment:
 
 ```shell
 kubectl expose deploy nginx-deployment --port 80
@@ -147,11 +145,8 @@ Nginx Documents:
 
 - [Nginx installation documents](https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-manifests/)
 
-- [Kubernetes Documents](https://kubernetes.github.io/ingress-nginx/deploy/)
-
 And these articles which are not completely correct! :
 
 - [jhooq article](https://jhooq.com/ingress-controller-nginx/#4-setup-kubernetes-ingress-controller)
 
 - [dev.to article](https://dev.to/mrturkmen/nginx-ingress-controller-with-haproxy-for-k8s-cluster-52e1#setup-nginx-ingress-controller)
-
