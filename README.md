@@ -3,13 +3,13 @@ This is my first attempt at implementing my Kubernetes cluster. In this process,
 
 ## Cluster Specification
 
-- Load-balancer: Ha-proxy
+- Load-balancer: Haproxy
 - 3 Master Nodes + 1 Worker Node
-- Kubeadm implementation method
+- Kubeadm implementation method / Kubespray
 
-- CRI: Docker
-- CNI: Weave-net
-- CSI:?
+- CRI: Docker 
+- CNI: Calico
+- CSI: OpenEBS / Topolvm
 - Ingress: Nginx
 
 Network:
@@ -26,11 +26,15 @@ Worker Node:
 
 ## OS Challenges via IaaS
 
-1. The most important challenge was the private network gateway. If you have multiple interfaces on one VM(Public and Private), You do not need this feature, and please disable it via IaaS Panel
+1. The most important challenge was the private network gateway. If you have multiple interfaces on one VM(Public and Private), You do not need this feature, and you need to disable it via IaaS Panel.
+
+   ![Filesystem](./images/private-gw.png)
 
 2. My Haproxy node has not gotten the local IP address automatically via netplan. The problem after too many attempts was about the interface MAC Address. So always check out the interface's MAC Address through IaaS Panel.
 
-3. After migration of master-2 the filesystem has corrupted and the docker service has not to start anymore. So I needed to use fsck tools in rescue mode to repair the filesystem.
+   ![Filesystem](./images/iaas-mac.png)
+
+3. After migration of master-2(Migrate the host via Openstack-CLI) the filesystem has corrupted and the docker service has not to start anymore. So I needed to use fsck tools in rescue mode to repair the filesystem.
 
    ![Filesystem](./images/docker-failure.png)
 
@@ -38,15 +42,19 @@ This failure and fsck lost metadata of docker. There is no solution and you shou
 
 ### UFW DNS Problem
 This problem hasn't compeletely undrestand for me!:
-Because of my own decision I disabled dhcp for all nodes and enable NAT to the haproxy node. Everything was ok until enabling the UFW firewall. After enabling the firewall dns resolving got problem! After many research I checked the [linuxize](https://linuxize.com/post/how-to-setup-a-firewall-with-ufw-on-ubuntu-20-04/#ip-masquerading) article and changed ufw setting and it got fixed!
+Because of my own decision I disabled DHCP for all nodes and enable NAT to the haproxy node. Everything was ok until enabling the UFW firewall. After enabling the firewall DNS resolution got problem! After many research I checked the [linuxize](https://linuxize.com/post/how-to-setup-a-firewall-with-ufw-on-ubuntu-20-04/#ip-masquerading) article and changed ufw setting and it got fixed!
+
+**Update:** In my forough cluster this problem was fixed everytime by one disable\ enabling the ufw!
 
 ## Kubernetes Challenges
 
  For the first time, I implemented Kubernetes via `Kubeadm`. This method of implementation was common and has its challenges:
 
-1. In the process of installation, the `kubeadm init` command was not run correctly. The error is related to kubelet and docker(CRI). After reading the log I found that the problem was related to `cgroup`. The cgroup of kubelet and docker was not the same and caused the problem. The solution:
+1. In the process of installation, the `kubeadm init` command was not run correctly. The error is related to kubelet and docker(CRI). After reading the logs I found that the problem was related to `cgroup`. The cgroup of kubelet and docker was not the same and caused the problem.
 
-   add the following lines to `/etc/docker/daemon.json` and restart the docker service to change the docker cgroup to systemd:
+   The solution:
+
+   Add the following lines to `/etc/docker/daemon.json` and restart the docker service to change the docker cgroup to systemd:
 
    ```shell
    {
@@ -80,7 +88,7 @@ So to help the etcd work fine as mentioned in the Kubernetes documents, I added 
 
 For Disk migration on the Openstack Volumes, I prefer to try multiple scenarios to try the etcd actions and understanding etcd cluster.
 
-In the first scenario we try the following steps:
+In the first scenario I tried the following steps:
 
 1.  Stop Docker and Kubelet on one of the master nodes.
 2. mount the disk on `/var/lib/etcd` 
@@ -98,7 +106,7 @@ So I tried to remove the member from the cluster and rejoin it. I tried the foll
 sudo ETCDCTL_API=3 etcdctl  --endpoints=https://192.168.32.10:2379,https://192.168.32.20:2379,https://192.168.32.30:2379  --cert=/etc/kubernetes/pki/etcd/server.crt  --key=/etc/kubernetes/pki/etcd/server.key  --cacert=/etc/kubernetes/pki/etcd/ca.crt  member remove 49aecc6b82b2b4ae
 ```
 
-now for adding the member:
+Next, for adding the member:
 
 ```shell
 sudo ETCDCTL_API=3 etcdctl  --endpoints=https://192.168.32.10:2379,https://192.168.32.20:2379,https://192.168.32.30:2379  --cert=/etc/kubernetes/pki/etcd/server.crt  --key=/etc/kubernetes/pki/etcd/server.key  --cacert=/etc/kubernetes/pki/etcd/ca.crt  member add aminyan-k8s-2 --peer-urls=https://192.168.32.20:2380,https://192.168.32.30:2379
@@ -114,13 +122,13 @@ So after failure in scenario 1 after mounting the disk on `/var/lib/etcd` we nee
 sudo ETCDCTL_API=3 etcdctl  --endpoints=https://192.168.32.10:2379,https://192.168.32.20:2379,https://192.168.32.30:2379  --cert=/etc/kubernetes/pki/etcd/server.crt  --key=/etc/kubernetes/pki/etcd/server.key  --cacert=/etc/kubernetes/pki/etcd/ca.crt  member list -w table
 ```
 
- and then By following command you can make a snapshot:
+ and then by following command you can make a snapshot:
 
 ```shell
 sudo ETCDCTL_API=3 etcdctl --endpoints https://192.168.32.10:2379,https://192.168.32.20:2379,https://192.168.32.30:2379 --cert=/etc/kubernetes/pki/etcd/server.crt  --key=/etc/kubernetes/pki/etcd/server.key  --cacert=/etc/kubernetes/pki/etcd/ca.crt snapshot save /home/ubuntu/snapshot-12-19-1.db
 ```
 
-Now copy the snapshot file to the node you want to recover and follow the steps:
+Now copy the snapshot file to the node you want to recover and follow the command:
 
 ```shell
 sudo ETCDCTL_API=3 etcdctl  --endpoints https://192.168.32.20:2379  --cert=/etc/kubernetes/pki/etcd/server.crt  --key=/etc/kubernetes/pki/etcd/server.key  --cacert=/etc/kubernetes/pki/etcd/ca.crt  --initial-cluster=aminyan-k8s-2=https://192.168.32.20:2380,aminyan-k8s-master-1=https://192.168.32.10:2380,aminyan-k8s-3=https://192.168.32.30:2380  --initial-cluster-token=etcd-cluster-1  --initial-advertise-peer-urls=https://192.168.32.20:2380  --name=aminyan-k8s-2  --skip-hash-check=true  --data-dir /var/lib/etcd/amin snapshot restore /root/snapshot-12-19.db
@@ -129,7 +137,7 @@ sudo ETCDCTL_API=3 etcdctl  --endpoints https://192.168.32.20:2379  --cert=/etc/
 **Notes:**
 
 1. `--initial-cluster-token=etcd-cluster-1` could be any name.
-2. Because when you want to restore snapshot the `--data-dir` should not be exited, so we need to restore the etcd on another directory! Be careful you need to change the data directory in `etcd.yaml` (/etc/kubernetes/manifests/etcd.yaml)
+2. Because when you want to restore snapshot the `--data-dir` should not be existed, so we need to restore the etcd on another directory! Be careful you need to change the data directory in `etcd.yaml` (/etc/kubernetes/manifests/etcd.yaml)
 
 To check the endpoint health you can use the following command:
 
@@ -138,11 +146,11 @@ sudo ETCDCTL_API=3 etcdctl  --endpoints=https://192.168.32.10:2379,https://192.1
 
 ```
 
-
+**Lessons:** The etcd cluster needs the data to get recover. If the data was deleted on one node, you only have to restore other etcd member's snapshots.
 
 ### Kubespray Challenges
 
-The Config file and hosts yaml of Kubespray implementation way was stored on this git repository but in this section I writing about the challenges I face!
+The Config file and hosts yaml of Kubespray implementation way was stored on this git repository but in this section I writing about the challenges I face:
 
 #### Firewall Problem
 
@@ -152,18 +160,22 @@ After executing the ansible-playbook and when the cluster was up, the `calico` p
 
 ### Hostnames Renaming!
 
-After deploying the k8s with kubespray ansible playbook, by my mistake, I forgot to rename the hostnames in inventory files. So the kubespray rename the OS hostnames and sync it to the inventory file!
+After deploying the k8s with kubespray ansible-playbook, by my mistake, I forgot to rename the hostnames in inventory files. So the kubespray rename the OS hostnames and sync it to the inventory file!
 
 So  I need a way to rename the hostnames, but all the Kubernetes components depend on the hostname!
 
-The mistakes I've done:
+To solve the problem I've done many mistakes:
 
-1. try to remove one of the nodes manually and rejoin it to the cluster. Don't ask what happened!
+1. Try to remove one of the nodes manually and rejoin it to the cluster. Don't ask what happened!
 2. After that before running `remove-node.yaml` kubespray playbook, I run `cluster.yaml` again with new hostnames in the inventory file. It completely ruined the cluster. Never ever run the `cluster.yaml` again before removing the nodes.
+
+### Solution
+
+To rename the hostnames, you just need to first execute the `remove-node.yaml` and rejoin the node via `cluster.yaml` again.
 
 #### Pod's eviction problem
 
-After all, I've done, I tried to run`remove-node.yaml` or `reset.yaml` but the playbook froze on some steps. So I tried to drain nodes and delete them manually. The nodes are frozen on the draining process. After googling on it I found the [solution](https://medium.com/@felipedutratine/when-you-try-to-drain-a-kubernetes-node-but-it-blocks-5aba9592d7c9).
+After all I've done, I tried to run`remove-node.yaml` or `reset.yaml` but the playbook froze on some steps. So I tried to drain nodes and delete them manually. The nodes are frozen on the draining process. After googling on it I found the [solution](https://medium.com/@felipedutratine/when-you-try-to-drain-a-kubernetes-node-but-it-blocks-5aba9592d7c9).
 
 The problem was pods that came to a `terminating` state but were blocked!
 
