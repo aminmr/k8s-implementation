@@ -1,4 +1,4 @@
-# NAT !!!
+# NAT!
 
 This document is just a handy command keeper for NAT! :)
 

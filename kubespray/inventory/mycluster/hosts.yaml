@@ -1,0 +1,38 @@
+all:
+  hosts:
+    amin-k8s-master-1:
+      ansible_host: 192.168.32.10
+      ip: 192.168.32.10
+      access_ip: 192.168.32.10
+    amin-k8s-master-2:
+      ansible_host: 192.168.32.20
+      ip: 192.168.32.20
+      access_ip: 192.168.32.20
+    amin-k8s-master-3:
+      ansible_host: 192.168.32.30
+      ip: 192.168.32.30
+      access_ip: 192.168.32.30
+  vars:
+      ansible_port: 22333
+  children:
+    kube_control_plane:
+      hosts:
+        amin-k8s-master-1:
+        amin-k8s-master-2:
+        amin-k8s-master-3:
+    kube_node:
+      hosts:
+        amin-k8s-master-1:
+        amin-k8s-master-2:
+        amin-k8s-master-3:
+    etcd:
+      hosts:
+        amin-k8s-master-1:
+        amin-k8s-master-2:
+        amin-k8s-master-3:
+    k8s_cluster:
+      children:
+        kube_control_plane:
+        kube_node:
+    calico_rr:
+      hosts: {}
