@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: nginx-ingress
+  annotations:
+     kubernetes.io/ingress.class: "nginx"
+     cert-manager.io/cluster-issuer: "letsencrypt"
+spec:
+  tls: 
+    - hosts:
+        - nginx.aminmr.ir
+      secretName: nginx-ssl
+  rules:
+  - host: nginx.aminmr.ir
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: nginx-deployment
+            port:
+              number: 80
