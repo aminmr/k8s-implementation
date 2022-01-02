@@ -20,7 +20,7 @@ backend kubernetes-nodes-http
     server kmaster3 192.168.32.30:30540 check fall 3 rise 2
 ```
 
-First clone the repository and checkout to the latest release branch(By the time of writing this document the latest release was v2.1 ):
+First clone the repository and checkout to the latest release branch(By the time of writing this document the latest release was v2.1
 
 ```bash
 git clone https://github.com/nginxinc/kubernetes-ingress/
