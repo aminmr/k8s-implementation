@@ -68,19 +68,19 @@ Because of my own decision I disabled DHCP for all nodes and enable NAT to the h
 
 2. After Kubernetes implementation, the API and etcd components were restarted repeatedly. The logs were following:
 
-<img src="./images/etcd-log-1.png" alt="Filesystem" />
+![etcd-log-1](./images/etcd-log-1.png)
 
-![Filesystem](./images/etcd-log-2.png)
+![etcd-log-2](./images/etcd-log-2.png)
 
-![Filesystem](./images/etcd-log-3.png)
+![etcd-log-3](./images/etcd-log-3.png)
 
 after reading these logs I was checked the disk latency. The disk latency was unbelievable!
 
-![Disk-latency](./images/dd-test-1.jpg)
+![Disk-latency-1](./images/dd-test-1.jpg)
 
 62 seconds! I have checked the exact command on multiple region(Mobinnet , Amsterdam, etc) and the result was much better:
 
-![Disk-latency](./images/dd-test-2.jpg)
+![Disk-latency-2](./images/dd-test-2.jpg)
 
 So to help the etcd work fine as mentioned in the Kubernetes documents, I added volumes to VMs and after backup the etcd, mount volumes to the `/var/lib/etcd` .
 
