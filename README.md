@@ -3,13 +3,13 @@ This is my first attempt at implementing my Kubernetes cluster. In this process,
 
 ## Cluster Specification
 
-- Load-balancer: Haproxy
+- Load-balancer: HaProxy
 - 3 Master Nodes + 1 Worker Node
 - Kubeadm implementation method / Kubespray
 
-- CRI: Docker 
+- CRI: Docker
 - CNI: Calico
-- CSI: OpenEBS / Topolvm
+- CSI: OpenEBS
 - Ingress: Nginx
 
 Network:
@@ -23,6 +23,16 @@ Master Nodes:
 
 Worker Node:
 - Worker-1: 192.168.32.40
+
+## Links
+
+[wordpress.aminmr.ir](wordpress.aminmr.ir)
+
+[prom.aminmr.ir](prom.aminmr.ir)
+
+[grafana.aminmr.ir](grafana.aminmr.ir)
+
+[nginx.aminmr.ir](nginx.aminmr.ir)
 
 ## OS Challenges via IaaS
 
