@@ -48,7 +48,7 @@ As you can see, the connection to the VM was established. I also check the `-v`(
 At last I removed the `NAT` rule in iptables and the problem was solved! I used the following command instead of `Masquerade` and it's not make the previous error:
 
 ```bash
--A POSTROUTING -s 10.0.0.0/24 -o vmbr0 -j SNAT --to-source <public-ip>
+iptables -A POSTROUTING -s 10.0.0.0/24 -o vmbr0 -j SNAT --to-source <public-ip>
 ```
 
 Until writing this document I'm not found the reason why the error occurred. 
