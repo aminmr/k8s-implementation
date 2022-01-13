@@ -40,7 +40,7 @@ Now after the installation, you need to configure the Haproxy. First, check out 
 kubectl get svc -n ingress-nginx
 ```
 
-![NodePort](/home/amin/k8s-implementation/images/NodePort.png)
+![NodePort](../../images/NodePort.png)
 
 And now it's time to configure the Haproxy config:
 
