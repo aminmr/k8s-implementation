@@ -1,0 +1,31 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: allow-ingress-namespace
+  annotations:
+    policies.kyverno.io/title: Add Network Policy
+    policies.kyverno.io/category: Multi-Tenancy
+    policies.kyverno.io/subject: NetworkPolicy
+    policies.kyverno.io/description: >-
+      allow connection from ingress-nginx namespace
+spec:
+  rules:
+  - name: ingress-allow
+    match:
+      resources:
+        kinds:
+        - Namespace
+    generate:
+      kind: NetworkPolicy
+      name: allow-from-ingress
+      namespace: "{{request.object.metadata.name}}"
+      data:
+        spec:
+          podSelector:
+            matchLabels:
+          ingress:
+          - from:
+            - namespaceSelector:
+                matchLabels:
+                  name: ingress-nginx
+
