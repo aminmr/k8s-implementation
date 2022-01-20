@@ -62,3 +62,19 @@ After these configurations restart the Haproxy and test the connection by using 
 
 By the end you can deploy simple nginx by applying `nginx-deployment.yaml` and `ingress-resource.yaml` to test  your ingress.
 
+## Caution
+
+If you want to install the ingress manually take care about the manifest type you choose in the official documents:
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.1/deploy/static/provider/cloud/deploy.yaml
+```
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.1.1/deploy/static/provider/baremetal/deploy.yaml
+```
+
+The `cloud` vs `baremetal` is important. If you apply the cloud yaml, the svc deployed as a `LoadBalancer` IP but we need the `NodePort`. So our choose for NodePort is the `baremetal` yaml file.
+
+
+
