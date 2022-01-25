@@ -107,9 +107,58 @@ helm upgrade stable prometheus-community/kube-prometheus-stack -f values.yaml
 
 By my mistake, I was deployed the etcd on the host. So I need to expose the metrics and configure them for the prometheus.
 
-In values I changed the following configurations:
+I tried to use the etcd's certificate which is allocated in `etc/ssl/etcd/ssl` to monitor the etcd endpoints, but non of the cert will do the job. So after many research I just tried to create a new certficate and it's working.
+
+#### ETCD Cert Generating
+
+1. First of all, Download and install the `cfssl`:
+
+   ```shell
+   mkdir ~/bin
+   curl -s -L -o ~/bin/cfssl https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+   curl -s -L -o ~/bin/cfssljson https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+   chmod +x ~/bin/{cfssl,cfssljson}
+   export PATH=$PATH:~/bin
+   ```
+
+2. Generate the Confugure CA options:
+
+   ```shell
+   mkdir ~/cfssl
+   cd ~/cfssl
+   cfssl print-defaults config > ca-config.json
+   cfssl print-defaults csr > ca-csr.json
+   ```
+
+3. Because we already have the `CA` we skip generating the CA file.
+
+4. Generate the Client Certificate:
+
+   ```shell
+   echo '{"CN":"client","hosts":[""],"key":{"algo":"rsa","size":2048}}' | cfssl gencert -ca=/etc/ssl/etcd/ssl/ca.pem -ca-key=/etc/ssl/etcd/ssl/ca-key.pem -config=ca-config.json -profile=client - | cfssljson -bare client
+   ```
+
+5. Now you have the new certificates. Let's go to the next step.
+
+#### Create the secret
+
+For using these certificates via prometheus we need to create a new `secret` in the monitoring namespace:
+
+```shell
+kubectl -n monitoring create secret generic kube-etcd-client-certs --from-file=/etc/ssl/etcd/ssl/ca.pem --from-file=client.pem --from-file=client-key.pem
+```
+
+#### Changing values.yaml
+
+In values.yaml of HelmChart I changed the following configurations:
+
+* First I need to write the `endpoints` for the etcd 
+* In `kubeEtcd.serviceMonitor` section define the certificates path. After adding the cert to prometheus via secret, the default path is `/etc/prometheus/secrets/<secret-name>`
+* In `prometheus.secrets‍‍` add the secrets you need.
 
 ![etcd-values](../images/etcd-values.png)
+
+![etcd-values](../images/etcd-values-2.png)
 
 ## Problem not solved yet
 
@@ -129,3 +178,5 @@ Kube-Proxy default metricsBindAddress:
 - [Link2](https://github.com/helm/charts/issues/16476#issuecomment-528681476)
 
 [Kube-Scheduler & Kube-Control-Manager issues](https://github.com/kubernetes/kubernetes/issues/93194)
+
+[ETCD Cert generating](https://github.com/Albertchong/Kubernetes-Tutorials/blob/master/Kubernetes%20Tutorials%2002%20-%20Generate%20Certificate%20for%20ETCD.md)
