@@ -1,0 +1,28 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: alertmanager-config
+  namespace: monitoring
+data:
+  config.yml: |-
+    global:
+    templates:
+    - '/etc/alertmanager/*.tmpl'
+    route:
+      receiver: 'alertmanager-bot'
+      group_by: ['alertname', 'priority']
+      group_wait: 10s
+      repeat_interval: 30m
+      routes:
+        - receiver: alertmanager-bot
+          match:
+            severity: slack
+          group_wait: 10s
+          repeat_interval: 1m
+ 
+    receivers:
+    - name: 'alertmanager-bot'
+      webhook_configs:
+      - send_resolved: true
+        url: 'http://vpn.aminmr.ir:8080'
+
