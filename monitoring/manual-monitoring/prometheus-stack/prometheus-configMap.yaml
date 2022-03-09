@@ -158,6 +158,6 @@ data:
           action: replace
           target_label: kubernetes_name
 
-      - job_name: 'node-node-exporter'
-        static_configs:
-        - targets: ['node-exporter.monitoring.svc.cluster.local:9100']
+          #      - job_name: 'node-node-exporter'
+        #        static_configs:
+                #        - targets: ['node-exporter.monitoring.svc.cluster.local:9100']
