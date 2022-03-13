@@ -71,7 +71,7 @@ If you want to change any configuration you can apply it through this `ConfigMap
 You can apply the `configMap.yaml `as following:
 
 ```shell
-kubectl apply -f prometheus-stack/configMap.yaml
+kubectl apply -f prometheus-stack/prometheus-configMap.yaml
 ```
 
 `prometheus.rules:`
@@ -161,6 +161,64 @@ kubectl apply -f grafana/grafana-deployment.yaml
 ```shell
 kubectl apply -f grafana/grafana-deployment.yaml
 ```
+
+## ETCD Monitoring
+
+### ETCD cert generating
+
+1. First of all, Download and install the `cfssl`:
+
+   ```shell
+   mkdir ~/bin
+   curl -s -L -o ~/bin/cfssl https://pkg.cfssl.org/R1.2/cfssl_linux-amd64
+   curl -s -L -o ~/bin/cfssljson https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64
+   chmod +x ~/bin/{cfssl,cfssljson}
+   export PATH=$PATH:~/bin
+   ```
+
+2. Generate the Confugure CA options:
+
+   ```shell
+   mkdir ~/cfssl
+   cd ~/cfssl
+   cfssl print-defaults config > ca-config.json
+   cfssl print-defaults csr > ca-csr.json
+   ```
+
+3. Because we already have the `CA` we skip generating the CA file.
+
+4. Generate the Client Certificate:
+
+   ```shell
+   echo '{"CN":"client","hosts":[""],"key":{"algo":"rsa","size":2048}}' | cfssl gencert -ca=/etc/ssl/etcd/ssl/ca.pem -ca-key=/etc/ssl/etcd/ssl/ca-key.pem -config=ca-config.json -profile=client - | cfssljson -bare client
+   ```
+
+5. Now you have the new certificates. Let's go to the next step.
+
+### Create the secret
+
+For using these certificates via prometheus we need to create a new `secret` in the monitoring namespace:
+
+```shell
+kubectl -n monitoring create secret generic kube-etcd-client-certs --from-file=/etc/ssl/etcd/ssl/ca.pem --from-file=client.pem --from-file=client-key.pem
+```
+
+### Apply in configuration
+
+Other configuration included adding certificates in prometheus deployment and prometheus has been done in this repo. For further description:
+
+1. First you need to add the prometheus scrapes in `prometheus.yaml` which is in prometheus `configMap`
+
+2. Add the secret to the prometheus `deployment` 
+
+3. Apply both prometheus `configMap` and `deployment`:
+
+   ~~~shell
+   kubectl apply -f prometheus-stack/prometheus-configMap.yaml
+   kubectl apply -f prometheus-stack/prometheus-deployment.yaml
+   ~~~
+
+   
 
 ## References
 
