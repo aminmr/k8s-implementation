@@ -113,7 +113,7 @@ kubectl apply -f prometheus-stack/prometheus-deployment.yaml
 This ConfigMap contains `config.yaml` for alertManager. You can deploy via the following command:
 
 ```shell
-kubectl apply -f alertManager/alertManagerConfigmap.yaml
+kubectl apply -f alertManager/alertManager-configmap.yaml
 ```
 
 ### TemplateConfigMap
@@ -121,7 +121,7 @@ kubectl apply -f alertManager/alertManagerConfigmap.yaml
 This ConfigMap contains `default.tmpl` for alertmanager template. You can deploy via the following command:
 
 ```shell
-kubectl apply -f alertManager/alertManagerTemplateConfigmap.yaml
+kubectl apply -f alertManager/alertManagerTemplate-configmap.yaml
 ```
 
 ### Deployment
@@ -129,7 +129,7 @@ kubectl apply -f alertManager/alertManagerTemplateConfigmap.yaml
 And the deployment which use the official image and two previous template to deploy the alertmanager. Try the following command:
 
 ```shell
-kubectl apply -f alertManager/alertManagerDeployment.yaml
+kubectl apply -f alertManager/alertManager-deployment.yaml
 ```
 
 ### Service
@@ -137,7 +137,7 @@ kubectl apply -f alertManager/alertManagerDeployment.yaml
 And the service is to access the alertManager:
 
 ```
-kubectl apply -f alertManager/alertManagerService.yaml
+kubectl apply -f alertManager/alertManager-service.yaml
 ```
 
 ## Grafana
@@ -159,7 +159,7 @@ kubectl apply -f grafana/grafana-deployment.yaml
 ### Service
 
 ```shell
-kubectl apply -f grafana/grafana-deployment.yaml
+kubectl apply -f grafana/grafana-service.yaml
 ```
 
 ## ETCD Monitoring
@@ -218,7 +218,6 @@ Other configuration included adding certificates in prometheus deployment and pr
    kubectl apply -f prometheus-stack/prometheus-deployment.yaml
    ~~~
 
-   
 
 ## References
 
