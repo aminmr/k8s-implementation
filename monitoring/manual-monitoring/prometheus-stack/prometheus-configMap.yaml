@@ -157,7 +157,34 @@ data:
         - source_labels: [__meta_kubernetes_service_name]
           action: replace
           target_label: kubernetes_name
-
-          #      - job_name: 'node-node-exporter'
-        #        static_configs:
-                #        - targets: ['node-exporter.monitoring.svc.cluster.local:9100']
+      
+          #      - job_name: etcd
+          #        scheme: https
+          #        kubernetes_sd_configs:
+          #        - role: pod
+          #          relabel_configs:
+          #        - action: keep
+          #          source_labels:
+          #          - __meta_kubernetes_namespace
+          #          - __meta_kubernetes_pod_name
+          #          separator: '/'
+          #          regex: 'kube-system/etcd-manager-main.+'
+          #        - source_labels:
+          #          - __address__
+          #          action: replace
+          #          target_label: __address__
+          #          regex: (.+?)(\\:\\d)?
+          #          replacement: $1:4001
+          #        tls_config:
+          #          insecure_skip_verify: true
+          #          cert_file: /opt/prometheus/secrets/client.pem
+          #          key_file: /opt/prometheus/secrets/client-key.pem
+          #
+      - job_name: 'etcd'
+        scheme: https
+        tls_config:
+          insecure_skip_verify: true
+          cert_file: /etc/prometheus/secrets/client.pem
+          key_file: /etc/prometheus/secrets/client-key.pem
+        static_configs:
+          - targets: ['192.168.32.10:2379','192.168.32.20:2379','192.168.32.30:2379']

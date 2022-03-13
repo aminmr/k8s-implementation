@@ -36,6 +36,8 @@ spec:
               mountPath: /etc/prometheus/
             - name: prometheus-storage-volume
               mountPath: /prometheus/
+            - name: etcd-secret
+              mountPath: /etc/prometheus/secrets/
       volumes:
         - name: prometheus-config-volume
           configMap:
@@ -44,3 +46,8 @@ spec:
   
         - name: prometheus-storage-volume
           emptyDir: {}
+
+        - name: etcd-secret
+          secret:
+            secretName: kube-etcd-client-certs
+            
