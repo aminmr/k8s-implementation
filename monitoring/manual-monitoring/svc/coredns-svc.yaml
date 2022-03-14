@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: stable
+    meta.helm.sh/release-namespace: helm-monitoring
+  creationTimestamp: "2022-03-09T13:53:51Z"
+  labels:
+    app: kube-prometheus-stack-coredns
+    app.kubernetes.io/instance: stable
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    app.kubernetes.io/version: 30.0.1
+    chart: kube-prometheus-stack-30.0.1
+    heritage: Helm
+    jobLabel: coredns
+    release: stable
+  name: stable-kube-prometheus-sta-coredns
+  namespace: kube-system
+  resourceVersion: "11888542"
+  uid: f5048460-1f7b-48e7-9965-17b5fa2af27e
+spec:
+  clusterIP: None
+  clusterIPs:
+  - None
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http-metrics
+    port: 9153
+    protocol: TCP
+    targetPort: 9153
+  selector:
+    k8s-app: kube-dns
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

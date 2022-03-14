@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    meta.helm.sh/release-name: stable
+    meta.helm.sh/release-namespace: helm-monitoring
+    prometheus.io/scrape: "true"
+  creationTimestamp: "2022-03-09T13:53:51Z"
+  labels:
+    app: kube-prometheus-stack-kube-controller-manager
+    app.kubernetes.io/instance: stable
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    app.kubernetes.io/version: 30.0.1
+    chart: kube-prometheus-stack-30.0.1
+    heritage: Helm
+    jobLabel: kube-controller-manager
+    release: stable
+  name: stable-kube-prometheus-sta-kube-controller-manager
+  namespace: kube-system
+  resourceVersion: "13830476"
+  uid: 5f349d54-63c3-456f-9d6d-2a3e8d813c19
+spec:
+  clusterIP: None
+  clusterIPs:
+  - None
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http-metrics
+    port: 10252
+    protocol: TCP
+    targetPort: 10252
+  selector:
+    component: kube-controller-manager
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}
