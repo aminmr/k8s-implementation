@@ -31,6 +31,7 @@ data:
           - "alertmanager.monitoring.svc:9093"
 
     scrape_configs:
+
       - job_name: 'node-exporter'
         kubernetes_sd_configs:
           - role: endpoints
@@ -158,29 +159,7 @@ data:
           action: replace
           target_label: kubernetes_name
       
-          #      - job_name: etcd
-          #        scheme: https
-          #        kubernetes_sd_configs:
-          #        - role: pod
-          #          relabel_configs:
-          #        - action: keep
-          #          source_labels:
-          #          - __meta_kubernetes_namespace
-          #          - __meta_kubernetes_pod_name
-          #          separator: '/'
-          #          regex: 'kube-system/etcd-manager-main.+'
-          #        - source_labels:
-          #          - __address__
-          #          action: replace
-          #          target_label: __address__
-          #          regex: (.+?)(\\:\\d)?
-          #          replacement: $1:4001
-          #        tls_config:
-          #          insecure_skip_verify: true
-          #          cert_file: /opt/prometheus/secrets/client.pem
-          #          key_file: /opt/prometheus/secrets/client-key.pem
-          #
-      - job_name: 'etcd'
+      - job_name: 'kubernetes-etcd'
         scheme: https
         tls_config:
           insecure_skip_verify: true
@@ -188,3 +167,85 @@ data:
           key_file: /etc/prometheus/secrets/client-key.pem
         static_configs:
           - targets: ['192.168.32.10:2379','192.168.32.20:2379','192.168.32.30:2379']
+
+            #      - job_name: kube-prometheus-kubelet
+            #        honor_labels: true
+            #        kubernetes_sd_configs:
+            #        - role: endpoints
+            #          namespaces:
+            #            names:
+            #            - kube-system
+            #        scheme: https
+            #        tls_config:
+            #          insecure_skip_verify: true
+            #          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+            #        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+            #        relabel_configs:
+            #        - source_labels:
+            #          - job
+            #          target_label: __tmp_prometheus_job_name
+            #        - action: keep
+            #          source_labels:
+            #          - __meta_kubernetes_service_label_app_kubernetes_io_name
+            #          - __meta_kubernetes_service_labelpresent_app_kubernetes_io_name
+            #          regex: (kubelet);true
+            #        - action: keep
+            #          source_labels:
+            #          - __meta_kubernetes_service_label_k8s_app
+            #          - __meta_kubernetes_service_labelpresent_k8s_app
+            #          regex: (kubelet);true
+            #        - action: keep
+            #          source_labels:
+            #          - __meta_kubernetes_endpoint_port_name
+            #          regex: https-metrics
+            #        - source_labels:
+            #          - __meta_kubernetes_endpoint_address_target_kind
+            #          - __meta_kubernetes_endpoint_address_target_name
+            #          separator: ;
+            #          regex: Node;(.*)
+            #          replacement: ${1}
+            #          target_label: node
+            #        - source_labels:
+            #          - __meta_kubernetes_endpoint_address_target_kind
+            #          - __meta_kubernetes_endpoint_address_target_name
+            #          separator: ;
+            #          regex: Pod;(.*)
+            #          replacement: ${1}
+            #          target_label: pod
+            #        - source_labels:
+            #          - __meta_kubernetes_namespace
+            #          target_label: namespace
+            #        - source_labels:
+            #          - __meta_kubernetes_service_name
+            #          target_label: service
+            #        - source_labels:
+            #          - __meta_kubernetes_pod_name
+            #          target_label: pod
+            #        - source_labels:
+            #          - __meta_kubernetes_pod_container_name
+            #          target_label: container
+            #        - source_labels:
+            #          - __meta_kubernetes_service_name
+            #          target_label: job
+            #          replacement: ${1}
+            #        - source_labels:
+            #          - __meta_kubernetes_service_label_k8s_app
+            #          target_label: job
+            #          regex: (.+)
+            #          replacement: ${1}
+            #        - target_label: endpoint
+            #          replacement: https-metrics
+            #        - source_labels:
+            #          - __metrics_path__
+            #          target_label: metrics_path
+            #        - source_labels:
+            #          - __address__
+            #          target_label: __tmp_hash
+            #          modulus: 1
+            #          action: hashmod
+            #        - source_labels:
+            #          - __tmp_hash
+            #          regex: 0
+            #          action: keep
+            #        metric_relabel_configs: []
+            #      
