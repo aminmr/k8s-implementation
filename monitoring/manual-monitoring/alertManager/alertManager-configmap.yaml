@@ -16,7 +16,7 @@ data:
       routes:
         - receiver: alertmanager-bot
           match:
-            severity: slack
+            severity: warning
           group_wait: 10s
           repeat_interval: 1m
  
